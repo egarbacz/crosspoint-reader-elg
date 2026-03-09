@@ -34,6 +34,21 @@ struct PageTurnResult {
   bool next;
 };
 
+// turn page if the relevant buttons were pressed. This is customized for ELG
+inline PageTurnResult detectPageTurn(const MappedInputManager& input) {
+  const bool usePress = !SETTINGS.longPressChapterSkip;
+  const bool prev = usePress ? (input.wasPressed(MappedInputManager::Button::Left))
+                             : (input.wasReleased(MappedInputManager::Button::Left));
+  const bool powerTurn = SETTINGS.shortPwrBtn == CrossPointSettings::SHORT_PWRBTN::PAGE_TURN &&
+                         input.wasReleased(MappedInputManager::Button::Power);
+  const bool next = usePress ? (input.wasPressed(MappedInputManager::Button::PageBack) || input.wasPressed(MappedInputManager::Button::PageForward) || powerTurn ||
+                                input.wasPressed(MappedInputManager::Button::Right))
+                             : (input.wasPressed(MappedInputManager::Button::PageBack) || input.wasReleased(MappedInputManager::Button::PageForward) || powerTurn ||
+                                input.wasReleased(MappedInputManager::Button::Right));
+  return {prev, next};
+}
+
+/*
 inline PageTurnResult detectPageTurn(const MappedInputManager& input) {
   const bool usePress = !SETTINGS.longPressChapterSkip;
   const bool prev = usePress ? (input.wasPressed(MappedInputManager::Button::PageBack) ||
@@ -48,6 +63,7 @@ inline PageTurnResult detectPageTurn(const MappedInputManager& input) {
                                 input.wasReleased(MappedInputManager::Button::Right));
   return {prev, next};
 }
+*/
 
 inline void displayWithRefreshCycle(const GfxRenderer& renderer, int& pagesUntilFullRefresh) {
   if (pagesUntilFullRefresh <= 1) {
